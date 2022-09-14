@@ -61,6 +61,10 @@ frame1.place(x=20, y=60)
 lmain1 = tk.Label(frame1)
 lmain1.place(x=0, y=0)
 
+arm_cam = ck.CTkLabel(window, height=30, width=220, text_font=("Calibre", 10), text_color="white", padx=5, fg_color="red")
+arm_cam.place(x=240, y=65)
+arm_cam.configure(text='Video Feed From Arm Side')
+
 frame2 = tk.Frame(height=240, width=240)
 frame2.place(x=700, y=280)
 lmain2 = tk.Label(frame2)
@@ -82,12 +86,14 @@ def detect():
     ret, frame = cap.read()
 
     image1 = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
     image1 = cv2.resize(image1, (660,470))
-    img = image1[:, :650, :]
-    imgarr = Image.fromarray(img)
-    imgtk = ImageTk.PhotoImage(imgarr)
-    lmain1.imgtk = imgtk
-    lmain1.configure(image=imgtk)
+
+    img1 = image1[:, :650, :]
+    imgarr1 = Image.fromarray(img1)
+    imgtk1 = ImageTk.PhotoImage(imgarr1)
+    lmain1.imgtk = imgtk1
+    lmain1.configure(image=imgtk1)
     lmain1.after(10, detect)
 
 
