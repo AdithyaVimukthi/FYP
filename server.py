@@ -10,10 +10,12 @@ DISCONNECT_MESSAGE = "!DISCONNECT"
 
 print(SERVER)
 
-server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #(socket family, socket type)
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # (socket family, socket type)
 server.bind(ADDR)
 
+
 def handle_client(conn, addr):
+    global gripper
     print(f"[NEW CONNECTION] {addr} connected.")
 
     connected = True
@@ -26,8 +28,14 @@ def handle_client(conn, addr):
                 connected = False
                 print(f"[{addr}] {msg}")
             else:
-                angles = msg.split('_')
-                print(f"[Elbow Angle] {angles[0]}  ///  [Shoulder Angle] {angles[1]}")
+                msg_part = msg.split()
+
+                if msg_part[2] == "0":
+                    gripper = "gripped"
+                if msg_part[2] == "1":
+                    gripper = "grip off"
+
+                print(f"[Elbow Angle] {msg_part[0]}  ///  [Shoulder Angle] {msg_part[1]} /// {gripper} /// [Rotation(%)] {msg_part[3]}")
 
             conn.send("Msg received".encode(FORMAT))
     conn.close()

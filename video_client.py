@@ -1,12 +1,13 @@
 # lets make the client code
 import socket
-import cv2
+
 import pickle
 import struct
+import cv2
 
 # create socket
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-host_ip = '192.168.4.106'  # paste your server ip address here
+host_ip = '192.168.11.55'  # paste your server ip address here
 port = 8024
 client_socket.connect((host_ip, port))  # a tuple
 data = b""

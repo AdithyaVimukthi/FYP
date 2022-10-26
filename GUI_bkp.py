@@ -24,14 +24,15 @@ def end():
 def pause():
     pass
 
-
+'''
 # create socket
 client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-host_ip = '192.168.8.101'  # paste your server ip address here
-port = 5050
+host_ip = '192.168.11.55'  # paste your server ip address here
+port = 8024
 client_socket.connect((host_ip, port))  # a tuple
 data = b""
 payload_size = struct.calcsize("Q")
+'''
 
 window = tk.Tk()
 window.geometry("960x540")
@@ -105,42 +106,27 @@ mp_holistic = mp.solutions.holistic
 
 
 def detect():
-    global data
-    ret1, frame_1 = cam1.read()
-    ret2, frame_2 = cam1.read()
 
-    image1 = cv2.cvtColor(frame_1, cv2.COLOR_BGR2RGB)
-    image1 = cv2.resize(image1, (660, 470))
-    img1 = image1[:, :650, :]
-    imgarr1 = Image.fromarray(img1)
-    imgtk1 = ImageTk.PhotoImage(imgarr1)
-    lmain1.imgtk2 = imgtk1
-    lmain1.configure(image=imgtk1)
-    # lmain1.after(10, detect)
+        ret1, frame_1 = cam1.read()
+        ret2, frame_2 = cam1.read()
 
-    while len(data) < payload_size:
-        packet = client_socket.recv(4 * 1024)  # 4K
-        if not packet: break
-        data += packet
-    packed_msg_size = data[:payload_size]
-    data = data[payload_size:]
-    msg_size = struct.unpack("Q", packed_msg_size)[0]
+        image1 = cv2.cvtColor(frame_1, cv2.COLOR_BGR2RGB)
+        image1 = cv2.resize(image1, (660, 470))
+        img1 = image1[:, :650, :]
+        imgarr1 = Image.fromarray(img1)
+        imgtk1 = ImageTk.PhotoImage(imgarr1)
+        lmain1.imgtk2 = imgtk1
+        lmain1.configure(image=imgtk1)
+        # lmain1.after(10, detect)
 
-    while len(data) < msg_size:
-        data += client_socket.recv(4 * 1024)
-    frame_data = data[:msg_size]
-    data = data[msg_size:]
-    frame = pickle.loads(frame_data)
-    cv2.imshow("RECEIVING VIDEO", frame)
-
-    image2 = cv2.cvtColor(frame_2, cv2.COLOR_BGR2HLS)
-    image2 = cv2.resize(image2, (230, 230))
-    img2 = image2[:, :230, :]
-    imgarr2 = Image.fromarray(img2)
-    imgtk2 = ImageTk.PhotoImage(imgarr2)
-    lmain2.imgtk2 = imgtk2
-    lmain2.configure(image=imgtk2)
-    lmain2.after(10, detect)
+        image2 = cv2.cvtColor(frame_2, cv2.COLOR_BGR2HLS)
+        image2 = cv2.resize(image2, (230, 230))
+        img2 = image2[:, :230, :]
+        imgarr2 = Image.fromarray(img2)
+        imgtk2 = ImageTk.PhotoImage(imgarr2)
+        lmain2.imgtk2 = imgtk2
+        lmain2.configure(image=imgtk2)
+        lmain2.after(10, detect)
 
 
 detect()
