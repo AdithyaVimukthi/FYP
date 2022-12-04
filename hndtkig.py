@@ -7,7 +7,7 @@ HEADER = 64
 PORT = 5050
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
-SERVER = "192.168.8.100"
+SERVER = "192.168.8.101"
 ADDR = (SERVER, PORT)
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -115,7 +115,7 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
                                   mp_drawing.DrawingSpec(color=(255,0,255), thickness=2, circle_radius=2),
                                   mp_drawing.DrawingSpec(color=(0, 240, 240), thickness=2, circle_radius=1))   #Draw pose landmarks
 
-       #cv2.imshow("Holistic Model", image)
+        cv2.imshow("Holistic Model", image)
 
         # Extract and draw pose on plain white image
         h, w, c = img.shape  # get shape of original frame
