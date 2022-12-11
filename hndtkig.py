@@ -2,12 +2,16 @@ import mediapipe as mp
 import cv2
 import numpy as np
 import socket
+import sys
+
+sys.stdout = open("Data_out.txt", "w")
 
 HEADER = 64
 PORT = 5050
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
 SERVER = "192.168.8.101"
+#SERVER = "192.168.11.240"
 ADDR = (SERVER, PORT)
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -15,6 +19,8 @@ client.connect(ADDR)
 
 print(" ------Hello World------ ")
 print("Wellcome to Hand Tracking")
+print()
+print("{:<20} {:<20} {:<20} {:<20}".format('Elbow angle', 'Shoulder angle', 'Gripper', 'Rotation'))
 
 def send(msg):
     message = msg.encode(FORMAT)
@@ -88,13 +94,14 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
             rotation_p = round(wrist2[0] * 100)
             distace = round(calculate_dis(MFT, wrist2))
 
-            if distace > 100:
+            if distace < 100:
                 grip = 1
             else:
                 grip = 0
 
             msg = str(angle_elbow) + " " + str(angle_shoulder) + " " + str(grip) + " " + str(rotation_p)
             send(msg)
+            print("{:<20} {:<20} {:<20} {:<20}".format(angle_elbow, angle_shoulder, grip, rotation_p))
 
             # Visualize angle
             cv2.putText(image, str(angle_elbow),
@@ -139,5 +146,5 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
 cap.release()
 cv2.destroyAllWindows()
 
-print("Final angles:- ",angle_elbow,"////",angle_shoulder)
+#print("Final angles:- ",angle_elbow,"////",angle_shoulder)
 print("Thank You")

@@ -1,5 +1,6 @@
 import socket
 import threading
+import cv2
 
 HEADER = 64
 PORT = 5050
@@ -13,6 +14,7 @@ print(SERVER)
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # (socket family, socket type)
 server.bind(ADDR)
 
+cap = cv2.VideoCapture(0)
 
 def handle_client(conn, addr):
     global gripper
@@ -20,6 +22,8 @@ def handle_client(conn, addr):
 
     connected = True
     while connected:
+        success, img = cap.read()
+        cv2.imshow("Holistic Model", img)
         msg_length = conn.recv(HEADER).decode(FORMAT)
         if msg_length:
             msg_length = int(msg_length)

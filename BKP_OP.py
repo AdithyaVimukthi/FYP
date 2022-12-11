@@ -2,12 +2,16 @@ import mediapipe as mp
 import cv2
 import numpy as np
 import socket
+import sys
+
+sys.stdout = open("Data_out.txt", "w")
 
 HEADER = 64
 PORT = 5050
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
 SERVER = "192.168.8.101"
+#SERVER = "192.168.11.240"
 ADDR = (SERVER, PORT)
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -15,7 +19,8 @@ client.connect(ADDR)
 
 print(" ------Hello World------ ")
 print("Wellcome to Hand Tracking")
-
+print()
+print("{:<20} {:<20} {:<20} {:<20}".format('Elbow angle', 'Shoulder angle', 'Gripper', 'Rotation'))
 
 def send(msg):
     message = msg.encode(FORMAT)
@@ -24,7 +29,6 @@ def send(msg):
     send_length += b' ' * (HEADER - len(send_length))
     client.send(send_length)
     client.send(message)
-
 
 def calculate_angle(a, b, c):
     a = np.array(a)  # Firstadi99
@@ -39,16 +43,14 @@ def calculate_angle(a, b, c):
 
     return angle
 
-
 def calculate_dis(a, b):
     a = np.array(a)  # First point
     b = np.array(b)  # second point
 
-    sqrs = (a[0] * 960 - b[0] * 960) ** 2 + (a[1] * 720 - b[1] * 720) ** 2
+    sqrs = (a[0]*960 - b[0]*960) ** 2 + (a[1]*720 - b[1]*720) ** 2
     dist = np.sqrt(sqrs)
 
     return dist
-
 
 mp_drawing = mp.solutions.drawing_utils
 mp_holistic = mp.solutions.holistic
@@ -59,11 +61,11 @@ cap = cv2.VideoCapture(0)
 with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
     while True:
         success, img = cap.read()
-        img = cv2.resize(img, (960, 720))
-        image = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)  # color convert BGR to RGB
-        results = holistic.process(image)  # make detection
+        img = cv2.resize(img,(960,720))
+        image = cv2.cvtColor(img,cv2.COLOR_BGR2RGB) #color convert BGR to RGB
+        results = holistic.process(image)           #make detection
 
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)  # color convert RGB to BGR
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)#color convert RGB to BGR
 
         # Extract landmarks
         try:
@@ -72,18 +74,18 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
 
             # Get coordinates
             hip = [landmarks1[mp_holistic.PoseLandmark.RIGHT_HIP.value].x,
-                   landmarks1[mp_holistic.PoseLandmark.RIGHT_HIP.value].y]
+                        landmarks1[mp_holistic.PoseLandmark.RIGHT_HIP.value].y]
             shoulder = [landmarks1[mp_holistic.PoseLandmark.RIGHT_SHOULDER.value].x,
                         landmarks1[mp_holistic.PoseLandmark.RIGHT_SHOULDER.value].y]
             elbow = [landmarks1[mp_holistic.PoseLandmark.RIGHT_ELBOW.value].x,
                      landmarks1[mp_holistic.PoseLandmark.RIGHT_ELBOW.value].y]
             wrist1 = [landmarks1[mp_holistic.PoseLandmark.RIGHT_WRIST.value].x,
-                      landmarks1[mp_holistic.PoseLandmark.RIGHT_WRIST.value].y]
+                     landmarks1[mp_holistic.PoseLandmark.RIGHT_WRIST.value].y]
 
             MFT = [landmarks2[mp_holistic.HandLandmark.MIDDLE_FINGER_TIP.value].x,
                    landmarks2[mp_holistic.HandLandmark.MIDDLE_FINGER_TIP.value].y]
             wrist2 = [landmarks2[mp_holistic.HandLandmark.WRIST.value].x,
-                      landmarks2[mp_holistic.HandLandmark.WRIST.value].y]
+                   landmarks2[mp_holistic.HandLandmark.WRIST.value].y]
 
             # Calculate angle
             angle_elbow = round(calculate_angle(shoulder, elbow, wrist1))
@@ -92,18 +94,19 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
             rotation_p = round(wrist2[0] * 100)
             distace = round(calculate_dis(MFT, wrist2))
 
-            if distace > 100:
+            if distace < 100:
                 grip = 1
             else:
                 grip = 0
 
             msg = str(angle_elbow) + " " + str(angle_shoulder) + " " + str(grip) + " " + str(rotation_p)
             send(msg)
+            print("{:<20} {:<20} {:<20} {:<20}".format(angle_elbow, angle_shoulder, grip, rotation_p))
 
             # Visualize angle
             cv2.putText(image, str(angle_elbow),
                         tuple(np.multiply(elbow, [960, 720]).astype(int)),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2
+                        cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255),2
                         )
             cv2.putText(image, str(angle_shoulder),
                         tuple(np.multiply(shoulder, [960, 720]).astype(int)),
@@ -112,14 +115,12 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
         except:
             pass
 
-        mp_drawing.draw_landmarks(image, results.right_hand_landmarks, mp_holistic.HAND_CONNECTIONS,
-                                  mp_drawing.DrawingSpec(color=(255, 0, 255), thickness=2, circle_radius=2),
-                                  mp_drawing.DrawingSpec(color=(0, 240, 0), thickness=2,
-                                                         circle_radius=1))  # Draw RIGHT hands landmarks
-        mp_drawing.draw_landmarks(image, results.pose_landmarks, mp_holistic.POSE_CONNECTIONS,
-                                  mp_drawing.DrawingSpec(color=(255, 0, 255), thickness=2, circle_radius=2),
-                                  mp_drawing.DrawingSpec(color=(0, 240, 240), thickness=2,
-                                                         circle_radius=1))  # Draw pose landmarks
+        mp_drawing.draw_landmarks(image, results.right_hand_landmarks,mp_holistic.HAND_CONNECTIONS,
+                                  mp_drawing.DrawingSpec(color=(255,0,255), thickness=2, circle_radius=2),
+                                  mp_drawing.DrawingSpec(color=(0, 240, 0), thickness=2, circle_radius=1))   # Draw RIGHT hands landmarks
+        mp_drawing.draw_landmarks(image,results.pose_landmarks,mp_holistic.POSE_CONNECTIONS,
+                                  mp_drawing.DrawingSpec(color=(255,0,255), thickness=2, circle_radius=2),
+                                  mp_drawing.DrawingSpec(color=(0, 240, 240), thickness=2, circle_radius=1))   #Draw pose landmarks
 
         cv2.imshow("Holistic Model", image)
 
@@ -145,5 +146,5 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
 cap.release()
 cv2.destroyAllWindows()
 
-print("Final angles:- ", angle_elbow, "////", angle_shoulder)
+#print("Final angles:- ",angle_elbow,"////",angle_shoulder)
 print("Thank You")
