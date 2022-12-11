@@ -124,6 +124,7 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
 
         cv2.imshow("Holistic Model", image)
 
+        """
         # Extract and draw pose on plain white image
         h, w, c = img.shape  # get shape of original frame
         opImg = np.zeros([h, w, c])  # create blank image with original frame size
@@ -138,6 +139,7 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
                                   mp_drawing.DrawingSpec(color=(0, 240, 240), thickness=2, circle_radius=1))
 
         cv2.imshow("skeleton", opImg)
+        """
 
         if cv2.waitKey(1) & 0xFF == ord('q'):
             send(DISCONNECT_MESSAGE)
