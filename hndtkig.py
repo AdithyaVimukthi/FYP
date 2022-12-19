@@ -7,10 +7,11 @@ import sys
 sys.stdout = open("Data_out.txt", "w")
 
 HEADER = 64
-PORT = 5050
+PORT = 5055
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
-SERVER = "192.168.8.101"
+#SERVER = socket.gethostbyname(socket.gethostname())
+SERVER = "192.168.8.100"
 #SERVER = "192.168.11.240"
 ADDR = (SERVER, PORT)
 
@@ -52,6 +53,15 @@ def calculate_dis(a, b):
 
     return dist
 
+def test_drwgs():
+    cv2.circle(image, (900, 300), 10, (255, 0, 255), -1)    #left dot
+    cv2.circle(image, (480, 60), 10, (255, 0, 255), -1)     #up dot
+    cv2.circle(image, (480, 660), 10, (255, 0, 255), -1)    #down dot
+    cv2.circle(image, (250, 300), 10, (255, 0, 255), -1)    #Right dot
+    cv2.circle(image, (480, 300), 10, (255, 0, 255), -1)    #mid dot
+    cv2.line(image, (660, 0), (660, 960), (0, 0, 255), 2) #stading line
+    #cv2.line(image, (250, 0), (250, 960), (255, 0, 255), 2)
+
 mp_drawing = mp.solutions.drawing_utils
 mp_holistic = mp.solutions.holistic
 
@@ -61,7 +71,7 @@ cap = cv2.VideoCapture(0)
 with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=0.5) as holistic:
     while True:
         success, img = cap.read()
-        img = cv2.resize(img,(960,720))
+        img = cv2.resize(img, (960,720))
         image = cv2.cvtColor(img,cv2.COLOR_BGR2RGB) #color convert BGR to RGB
         results = holistic.process(image)           #make detection
 
@@ -112,6 +122,7 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
                         tuple(np.multiply(shoulder, [960, 720]).astype(int)),
                         cv2.FONT_HERSHEY_SIMPLEX, 1, (255, 255, 255), 2
                         )
+
         except:
             pass
 
@@ -122,6 +133,7 @@ with mp_holistic.Holistic(min_detection_confidence=0.5, min_tracking_confidence=
                                   mp_drawing.DrawingSpec(color=(255,0,255), thickness=2, circle_radius=2),
                                   mp_drawing.DrawingSpec(color=(0, 240, 240), thickness=2, circle_radius=1))   #Draw pose landmarks
 
+        #test_drwgs()
         cv2.imshow("Holistic Model", image)
 
         """

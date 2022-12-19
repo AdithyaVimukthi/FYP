@@ -1,10 +1,11 @@
 import socket
 import threading
-import cv2
 
 HEADER = 64
-PORT = 5050
-SERVER = socket.gethostbyname(socket.gethostname())
+PORT = 5055
+# SERVER = "192.168.11.240"
+SERVER = "192.168.8.100"
+# SERVER = socket.gethostbyname(socket.gethostname())
 ADDR = (SERVER, PORT)
 FORMAT = 'utf-8'
 DISCONNECT_MESSAGE = "!DISCONNECT"
@@ -14,16 +15,14 @@ print(SERVER)
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)  # (socket family, socket type)
 server.bind(ADDR)
 
-cap = cv2.VideoCapture(0)
 
 def handle_client(conn, addr):
     global gripper
     print(f"[NEW CONNECTION] {addr} connected.")
-
+    print("{:<20} {:<20} {:<20} {:<20}".format('Elbow angle', 'Shoulder angle', 'Gripper', 'Rotation'))
     connected = True
     while connected:
-        success, img = cap.read()
-        cv2.imshow("Holistic Model", img)
+
         msg_length = conn.recv(HEADER).decode(FORMAT)
         if msg_length:
             msg_length = int(msg_length)
@@ -34,12 +33,12 @@ def handle_client(conn, addr):
             else:
                 msg_part = msg.split()
 
-                if msg_part[2] == "0":
-                    gripper = "gripped"
                 if msg_part[2] == "1":
+                    gripper = "gripped"
+                if msg_part[2] == "0":
                     gripper = "grip off"
 
-                print(f"[Elbow Angle] {msg_part[0]}  ///  [Shoulder Angle] {msg_part[1]} /// {gripper} /// [Rotation(%)] {msg_part[3]}")
+                print("{:<20} {:<20} {:<20} {:<20}".format(msg_part[0], msg_part[1], gripper, msg_part[3]))
 
             conn.send("Msg received".encode(FORMAT))
     conn.close()
